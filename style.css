@@ -1,0 +1,563 @@
+/* =========================================================================
+   STYLE.CSS — CENTRIX · Panel de instrumentación técnica
+   ========================================================================= */
+
+:root{
+  --bg:            #10141A;
+  --bg-panel:      #171C24;
+  --bg-panel-alt:  #12161D;
+  --bg-inset:      #0D1116;
+  --border:        #2A313C;
+  --border-soft:   rgba(74,86,104,.35);
+  --text-primary:  #F4F1EA;
+  --text-secondary:#8A93A3;
+  --text-dim:      #545E6C;
+
+  --heavy:  #E8A33D;
+  --light:  #4FC3D9;
+  --green:  #3DCB7A;
+  --red:    #E5484D;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text-primary);
+  font-family:var(--font-display);
+  -webkit-font-smoothing:antialiased;
+}
+
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--border-soft);}
+
+.app{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* ============================= RIBBON ================================= */
+.ribbon{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  height:60px;
+  min-height:60px;
+  padding:0 20px;
+  background:var(--bg-panel);
+  border-bottom:1px solid var(--border);
+  z-index:10;
+}
+.ribbon-brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{width:28px;height:28px;color:var(--heavy);flex-shrink:0;}
+.brand-text{display:flex;flex-direction:column;line-height:1.2;}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:.14em;}
+.brand-sub{font-size:10.5px;font-family:var(--font-mono);color:var(--text-secondary);letter-spacing:.01em;}
+
+.ribbon-equip-select{display:flex;gap:6px;}
+.equip-tab{
+  display:flex;flex-direction:column;gap:2px;
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:6px 14px;
+  cursor:pointer;
+  color:var(--text-secondary);
+  transition:border-color .15s ease, color .15s ease, background .15s ease;
+  font-family:var(--font-display);
+}
+.equip-tab:hover{color:var(--text-primary);border-color:var(--border-soft);}
+.equip-tab.active{
+  border-color:var(--heavy);
+  background:rgba(232,163,61,.09);
+  color:var(--text-primary);
+}
+.equip-tab-num{font-family:var(--font-mono);font-size:9.5px;opacity:.65;letter-spacing:.05em;}
+.equip-tab-label{font-size:11.5px;font-weight:600;white-space:nowrap;}
+
+.ribbon-status{display:flex;align-items:center;gap:10px;}
+.ribbon-status .status-led{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 13px;
+  font-family:var(--font-mono);
+}
+.led-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  transition:background .2s ease, box-shadow .2s ease;
+}
+.status-led.warn .led-dot{background:var(--heavy);box-shadow:0 0 8px var(--heavy);}
+.status-led.bad .led-dot{background:var(--red);box-shadow:0 0 8px var(--red);}
+.led-label{font-size:10.5px;letter-spacing:.08em;color:var(--text-secondary);}
+
+.vbtn-qr{border-color:var(--green);color:var(--green);}
+.vbtn-qr:hover{background:rgba(61,203,122,.1);}
+
+/* ============================ MODAL: CÓDIGO QR ========================= */
+.qr-modal{
+  position:fixed;inset:0;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(10,13,17,.72);backdrop-filter:blur(3px);
+  padding:20px;
+}
+.qr-modal-card{
+  position:relative;
+  width:min(92vw, 360px);
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;
+  padding:26px 24px 22px;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+.qr-modal-card h3{margin:0 0 8px;font-size:16px;color:var(--text-primary);}
+.qr-modal-hint{margin:0 0 18px;font-size:12px;line-height:1.5;color:var(--text-secondary);}
+.qr-modal-code{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--text-primary);border-radius:10px;padding:12px;
+  width:216px;height:216px;margin:0 auto 14px;
+}
+.qr-modal-url{
+  font-family:var(--font-mono);font-size:10.5px;color:var(--text-dim);
+  word-break:break-all;margin-bottom:16px;
+}
+.qr-modal-marker-link{
+  display:block;font-size:11.5px;color:var(--light);text-decoration:none;
+  border-top:1px solid var(--border);padding-top:14px;
+}
+.qr-modal-marker-link:hover{text-decoration:underline;}
+.qr-modal-close{
+  position:absolute;top:12px;right:12px;
+  width:26px;height:26px;border-radius:50%;
+  background:transparent;border:1px solid var(--border);color:var(--text-secondary);
+  cursor:pointer;font-size:13px;line-height:1;
+}
+
+/* ============================ WORKSPACE ================================ */
+.workspace{
+  flex:1;
+  display:grid;
+  grid-template-columns:296px 1fr 348px;
+  gap:1px;
+  background:var(--border);
+  overflow:hidden;
+}
+.panel{
+  background:var(--bg-panel);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  min-width:0;
+  min-height:0;
+}
+.panel-head{
+  display:flex;align-items:baseline;gap:9px;
+  padding:15px 18px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.panel-eyebrow{font-family:var(--font-mono);font-size:10px;color:var(--heavy);letter-spacing:.1em;}
+.panel-head h2{margin:0;font-size:12.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--text-primary);}
+
+.panel-scroll{
+  flex:1;
+  overflow-y:auto;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+/* ---- Parámetros (izquierda) ---- */
+.param-group{display:flex;flex-direction:column;gap:14px;}
+.param-group-title{
+  font-family:var(--font-mono);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  color:var(--text-dim);
+  border-bottom:1px solid var(--border);
+  padding-bottom:7px;
+}
+.param-row{display:flex;flex-direction:column;gap:6px;}
+.param-row-head{
+  display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+}
+.param-row-head label{font-size:11.5px;color:var(--text-secondary);line-height:1.3;}
+.param-value{
+  display:flex;align-items:baseline;gap:3px;
+  font-family:var(--font-mono);font-size:12px;color:var(--text-primary);
+  flex-shrink:0;
+}
+.param-value .unit{color:var(--text-dim);font-size:10px;}
+.param-row input[type="range"]{
+  -webkit-appearance:none;
+  appearance:none;
+  width:100%;
+  height:3px;
+  border-radius:3px;
+  background:var(--border);
+  outline:none;
+  cursor:pointer;
+}
+.param-row input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent-c, var(--heavy));
+  border:2px solid var(--bg-panel);
+  box-shadow:0 0 0 1px var(--accent-c, var(--heavy));
+  cursor:pointer;
+}
+.param-row input[type="range"]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent-c, var(--heavy));
+  border:2px solid var(--bg-panel);
+  cursor:pointer;
+}
+
+.panel-foot{
+  padding:13px 18px;
+  border-top:1px solid var(--border);
+  background:var(--bg-panel-alt);
+  flex-shrink:0;
+}
+.foot-label{font-family:var(--font-mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);}
+.foot-eq{font-family:var(--font-mono);font-size:12.5px;color:var(--light);margin-top:5px;word-break:break-word;line-height:1.5;}
+
+/* ---- Visor 3D (centro) ---- */
+.panel-viewer{background:var(--bg-inset);}
+.viewer-toolbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  flex-shrink:0; background:var(--bg-panel);
+}
+.viewer-title{display:flex;align-items:baseline;gap:9px;}
+.viewer-title h2{margin:0;font-size:13.5px;font-weight:600;}
+.viewer-controls{display:flex;gap:7px;}
+.vbtn{
+  display:flex;align-items:center;gap:6px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);
+  border-radius:7px;padding:6px 11px;
+  font-family:var(--font-display);font-size:11px;
+  cursor:pointer;transition:all .15s ease;
+  text-decoration:none;
+}
+.vbtn svg{width:13px;height:13px;}
+.vbtn:hover{border-color:var(--border-soft);color:var(--text-primary);}
+.vbtn.active{border-color:var(--green);color:var(--green);background:rgba(61,203,122,.08);}
+
+.view-mode-group{
+  display:flex;gap:2px;
+  background:var(--bg-inset);
+  border:1px solid var(--border);
+  border-radius:8px;padding:2px;
+  margin-left:2px;
+}
+.view-mode-btn{
+  display:flex;align-items:center;gap:5px;
+  background:transparent;border:none;
+  color:var(--text-secondary);
+  border-radius:6px;padding:6px 10px;
+  font-family:var(--font-display);font-size:11px;
+  cursor:pointer;transition:all .15s ease;
+}
+.view-mode-btn svg{width:13px;height:13px;}
+.view-mode-btn:hover{color:var(--text-primary);}
+.view-mode-btn.active{background:var(--bg-panel);color:var(--light);box-shadow:0 0 0 1px var(--border-soft) inset;}
+
+.viewer-canvas-wrap{flex:1;position:relative;min-height:0;}
+#viewer3d{width:100%;height:100%;display:block;cursor:grab;}
+#viewer3d:active{cursor:grabbing;}
+.viewer-hint{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  font-family:var(--font-mono);font-size:10px;color:var(--text-dim);
+  background:rgba(13,17,22,.7);border:1px solid var(--border);
+  padding:5px 12px;border-radius:999px;pointer-events:none;
+  white-space:nowrap;
+}
+.viewer-hud{
+  position:absolute;top:14px;right:14px;
+  font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);
+  background:rgba(13,17,22,.62);border:1px solid var(--border);
+  border-radius:9px;padding:10px 13px;
+  display:flex;flex-direction:column;gap:4px;
+  pointer-events:none;text-align:right;min-width:120px;
+}
+.viewer-hud .hud-row{display:flex;justify-content:space-between;gap:14px;}
+.viewer-hud .hud-row b{color:var(--text-primary);font-weight:600;}
+
+/* ---- Cronómetro de simulación (derecha) ---- */
+.sim-clock{
+  display:flex;flex-direction:column;gap:12px;
+  background:var(--bg-panel-alt);border:1px solid var(--border);
+  border-radius:11px;padding:13px 14px;
+}
+.sim-clock-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.sim-clock-time-wrap{display:flex;flex-direction:column;gap:2px;}
+.sim-clock-eyebrow{font-family:var(--font-mono);font-size:8.8px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);}
+.sim-clock-time{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.sim-clock-transport{display:flex;gap:6px;}
+.sim-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:7px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);cursor:pointer;
+  transition:all .15s ease;
+}
+.sim-btn svg{width:14px;height:14px;}
+.sim-btn:hover{border-color:var(--border-soft);color:var(--text-primary);}
+.sim-btn.active{border-color:var(--green);color:var(--green);background:rgba(61,203,122,.1);}
+#simReset:hover{border-color:var(--heavy);color:var(--heavy);}
+
+.sim-clock-bottom{display:flex;flex-direction:column;gap:9px;}
+.sim-progress-wrap{display:flex;flex-direction:column;gap:5px;}
+.sim-progress-track{
+  height:5px;border-radius:4px;background:var(--border);overflow:hidden;
+}
+.sim-progress-fill{
+  height:100%;width:0%;border-radius:4px;
+  background:linear-gradient(90deg, var(--light), var(--green));
+  transition:width .12s linear;
+}
+.sim-progress-label{font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);}
+.sim-speed-group{display:flex;gap:5px;}
+.speed-btn{
+  flex:1;background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);border-radius:6px;padding:5px 0;
+  font-family:var(--font-mono);font-size:10.5px;cursor:pointer;
+  transition:all .15s ease;
+}
+.speed-btn:hover{color:var(--text-primary);border-color:var(--border-soft);}
+.speed-btn.active{border-color:var(--light);color:var(--light);background:rgba(79,195,217,.09);}
+
+/* ---- Datos (derecha) ---- */
+.alert-box{
+  display:flex;gap:11px;padding:12px 14px;border-radius:9px;
+  border:1px solid var(--green); background:rgba(61,203,122,.07);
+  transition:all .2s ease;
+}
+.alert-box.warn{border-color:var(--heavy);background:rgba(232,163,61,.08);}
+.alert-box.bad{border-color:var(--red);background:rgba(229,72,77,.08);}
+.alert-icon{width:18px;height:18px;flex-shrink:0;margin-top:1px;color:var(--green);}
+.alert-box.warn .alert-icon{color:var(--heavy);}
+.alert-box.bad .alert-icon{color:var(--red);}
+.alert-text{display:flex;flex-direction:column;gap:3px;}
+.alert-text strong{font-size:12px;font-weight:600;}
+.alert-text span{font-size:11px;color:var(--text-secondary);line-height:1.45;}
+
+.readout-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.readout-item{
+  background:var(--bg-panel-alt);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;
+  border-left:2px solid var(--border);
+}
+.readout-item.good{border-left-color:var(--green);}
+.readout-item.warn{border-left-color:var(--heavy);}
+.readout-item.bad{border-left-color:var(--red);}
+.readout-label{font-family:var(--font-mono);font-size:8.8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);}
+.readout-value{font-size:17px;font-weight:600;margin-top:5px;font-family:var(--font-display);}
+.readout-value .unit{font-size:10px;color:var(--text-secondary);font-weight:500;margin-left:3px;}
+
+.chart-block{display:flex;flex-direction:column;gap:8px;}
+.chart-label{display:flex;justify-content:space-between;align-items:baseline;}
+.chart-label span:first-child{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--text-secondary);}
+.chart-eq{font-family:var(--font-mono);font-size:10.5px;color:var(--light);}
+.chart-canvas-wrap{height:148px;position:relative;}
+
+/* ============================= FOOTER =================================== */
+.formula-strip{
+  display:flex;gap:30px;overflow-x:auto;
+  background:var(--bg-panel-alt);border-top:1px solid var(--border);
+  padding:9px 20px;flex-shrink:0;
+}
+.fs-item{display:flex;flex-direction:column;gap:2px;min-width:max-content;}
+.fs-tag{font-family:var(--font-mono);font-size:8.8px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);}
+.fs-eq{font-size:11.5px;color:var(--text-secondary);font-family:var(--font-mono);}
+
+/* ========================= MODO AR (AR.js / marcador) =====================
+   El botón vive en la barra del visor 3D (mismo estilo que los vbtn); todo
+   lo demás (video de cámara + canvas dedicado + overlay) vive fuera de
+   .workspace, en fixed, por encima de toda la interfaz, y permanece oculto
+   hasta que ar.js activa la cámara y el tracking del marcador.
+   ========================================================================= */
+.vbtn-ar{border-color:var(--light);color:var(--light);}
+.vbtn-ar:hover{background:rgba(79,195,217,.1);}
+.vbtn-marker{border-color:var(--border);color:var(--text-secondary);}
+.vbtn-marker:hover{border-color:var(--text-secondary);color:var(--text-primary);}
+.ar-unsupported-note{
+  font-family:var(--font-mono);font-size:9.5px;color:var(--text-dim);
+  border:1px solid var(--border);border-radius:7px;padding:6px 10px;
+  white-space:normal;line-height:1.4;max-width:260px;
+}
+
+/* Contenedor del <video> de la cámara creado por THREEx.ArToolkitSource.
+   Va DETRÁS del canvas (transparente) para que el modelo 3D se vea
+   compuesto sobre la imagen real de la cámara. */
+#arVideoWrap{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:199;overflow:hidden;background:#000;
+}
+#arVideoWrap video{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  min-width:100%;min-height:100%;
+  width:auto;height:auto;object-fit:cover;
+}
+
+#arCanvas{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:200;touch-action:none;background:transparent;
+}
+
+.ar-equip-switch{display:flex;gap:6px;}
+.ar-equip-switch .ar-chip{padding:7px 11px;}
+
+.ar-overlay{
+  position:fixed;inset:0;z-index:201;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  pointer-events:none; /* solo los controles hijos capturan toques; el resto deja pasar el tap al canvas AR */
+  font-family:var(--font-display);
+}
+.ar-overlay > *{pointer-events:auto;}
+
+.ar-topbar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.ar-equip-label{
+  font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text-primary);
+  background:rgba(13,17,22,.72);border:1px solid var(--border);border-radius:999px;
+  padding:7px 13px;margin-right:auto;
+}
+.ar-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(13,17,22,.72);border:1px solid var(--border);
+  color:var(--text-secondary);border-radius:999px;padding:7px 12px;
+  font-family:var(--font-display);font-size:11px;cursor:pointer;
+  backdrop-filter:blur(6px);transition:all .15s ease;
+}
+.ar-chip svg{width:14px;height:14px;}
+.ar-chip.active{border-color:var(--light);color:var(--light);background:rgba(79,195,217,.15);}
+.ar-chip-exit{border-color:var(--red);color:var(--red);}
+.ar-chip-exit:hover{background:rgba(229,72,77,.12);}
+
+.ar-hint{
+  align-self:center;
+  font-family:var(--font-mono);font-size:11px;color:var(--text-primary);
+  background:rgba(13,17,22,.72);border:1px solid var(--border);border-radius:999px;
+  padding:8px 16px;text-align:center;pointer-events:none;
+}
+
+.ar-bottombar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.ar-gesture-hint{
+  font-family:var(--font-mono);font-size:9.5px;color:var(--text-secondary);
+  background:rgba(13,17,22,.6);border:1px solid var(--border);border-radius:999px;
+  padding:6px 11px;pointer-events:none;
+}
+
+.ar-readout-panel{
+  position:absolute;transform:translate(-50%,-100%);
+  background:rgba(13,17,22,.82);border:1px solid var(--border-soft);
+  border-radius:10px;padding:9px 12px;min-width:150px;
+  pointer-events:none;backdrop-filter:blur(6px);
+}
+.ar-panel-title{font-family:var(--font-mono);font-size:9.5px;color:var(--light);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.ar-panel-row{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--text-secondary);padding:1.5px 0;}
+.ar-panel-row b{color:var(--text-primary);font-family:var(--font-mono);font-weight:600;}
+
+.ar-theory-card{
+  position:fixed;left:50%;bottom:90px;transform:translateX(-50%);
+  width:min(88vw, 360px);max-height:52vh;overflow-y:auto;
+  background:rgba(15,19,25,.94);border:1px solid var(--border-soft);
+  border-radius:13px;padding:16px 16px 14px;
+  box-shadow:0 10px 34px rgba(0,0,0,.45);
+}
+.ar-theory-close{
+  position:absolute;top:10px;right:10px;
+  width:24px;height:24px;border-radius:50%;
+  background:transparent;border:1px solid var(--border);color:var(--text-secondary);
+  cursor:pointer;font-size:12px;line-height:1;
+}
+.ar-theory-name{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:9px;padding-right:24px;}
+.ar-theory-row{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}
+.ar-theory-row b{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);}
+.ar-theory-row span{font-size:12px;color:var(--text-secondary);line-height:1.45;}
+.ar-theory-eq{font-family:var(--font-mono) !important;color:var(--light) !important;}
+
+.ar-toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+  background:rgba(229,72,77,.92);color:#fff;border-radius:9px;
+  padding:10px 16px;font-size:12px;max-width:80vw;text-align:center;
+  z-index:210;
+}
+
+/* ============================ RESPONSIVE ================================ */
+@media (max-width: 980px){
+  .workspace{
+    grid-template-columns:1fr;
+    grid-template-rows:340px auto auto;
+    overflow-y:auto;
+  }
+  .panel-viewer{order:-1;}
+  .panel-scroll{max-height:none;}
+  .ribbon{flex-wrap:wrap;height:auto;padding:10px 16px;gap:10px;}
+  .ribbon-equip-select{order:3;width:100%;overflow-x:auto;}
+  .formula-strip{padding:8px 16px;}
+
+  /* ---- Toolbar del visor 3D en celular ----
+     .viewer-toolbar y .viewer-controls no tenían flex-wrap: con
+     Reencuadrar + Girar eje + Industrial/Interior + Ver en AR en una sola
+     fila, en un viewport de ~380px el botón de AR (el único que importa
+     para este caso de uso) quedaba cortado o fuera de la vista sin
+     scroll horizontal evidente. Se envuelve en varias líneas y se le da
+     al botón de AR su propia fila, a todo el ancho, para que sea
+     imposible no encontrarlo con el pulgar. */
+  .viewer-toolbar{
+    flex-wrap:wrap;align-items:stretch;gap:8px;padding:10px 12px;
+  }
+  .viewer-title{width:100%;}
+  .viewer-controls{
+    flex-wrap:wrap;width:100%;gap:6px;
+  }
+  .vbtn, .view-mode-group{ flex:0 0 auto; }
+  .vbtn-ar{
+    flex:1 1 100%;
+    order:5; /* después de Reencuadrar/Girar eje/Industrial-Interior */
+    justify-content:center;
+    padding:10px 14px;font-size:12px;font-weight:600;
+    background:rgba(79,195,217,.1);
+  }
+  .vbtn-marker{
+    flex:1 1 100%;order:6;justify-content:center;
+  }
+  .ar-unsupported-note{
+    flex:1 1 100%;order:7;max-width:none;justify-content:center;
+    text-align:center;
+  }
+
+  /* Botón "Acceso desde celular" — en celular no tiene mucho sentido (ya
+     están viendo el simulador desde el teléfono), así que se oculta para
+     no competir por espacio en la cinta superior; el modal sigue
+     disponible si se abre desde escritorio y se comparte el link. */
+  .vbtn-qr{display:none;}
+
+  /* Selector de equipo dentro del overlay AR — en pantallas angostas pasa
+     a su propia fila para no comprimir los demás chips (Etiquetas,
+     Explorar componentes, Salir) hasta hacerlos ilegibles. */
+  .ar-equip-switch{
+    order:10;width:100%;justify-content:center;
+  }
+  .ar-topbar{row-gap:6px;}
+}
+

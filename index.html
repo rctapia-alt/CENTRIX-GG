@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CENTRIX · Simulador de Centrifugación — McCabe &amp; Smith</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<!-- AR.js (build three.js, vendorizado localmente) — expone el espacio de
+     nombres global THREEx (ArToolkitSource / ArToolkitContext / ArMarkerControls)
+     usado por ar.js para el modo de Realidad Aumentada basado en marcador. -->
+<script src="libs/arjs-threex.js"></script>
+<!-- Generador de código QR (vendorizado localmente) — usado por el botón
+     "Acceso desde celular" del header para compartir la URL del simulador. -->
+<script src="libs/qrcode.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ HEADER / RIBBON DE PROCESO ============ -->
+  <header class="ribbon">
+    <div class="ribbon-brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.6"/>
+        <circle cx="16" cy="16" r="3" fill="currentColor"/>
+        <path d="M16 3 L16 9 M16 23 L16 29 M3 16 L9 16 M23 16 L29 16" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
+      <div class="brand-text">
+        <span class="brand-name">CENTRIX</span>
+        <span class="brand-sub">Simulador de Operaciones Unitarias · Centrifugación</span>
+      </div>
+    </div>
+    <div class="ribbon-equip-select" id="equipSelect">
+      <button class="equip-tab active" data-equip="decanter">
+        <span class="equip-tab-num">01</span>
+        <span class="equip-tab-label">Decantador L·L</span>
+      </button>
+      <button class="equip-tab" data-equip="bowl">
+        <span class="equip-tab-num">02</span>
+        <span class="equip-tab-label">Purificador de Tazón</span>
+      </button>
+      <button class="equip-tab" data-equip="pump">
+        <span class="equip-tab-num">03</span>
+        <span class="equip-tab-label">Bomba Centrífuga</span>
+      </button>
+    </div>
+    <div class="ribbon-status">
+      <button class="vbtn vbtn-qr" id="btnQR" title="Generar código QR para abrir el simulador desde un celular">
+        <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M12.5 12.5h2.5v2.5h-2.5zM16.5 12.5h1v1h-1zM12.5 16.5h1v1h-1zM16.5 16.5h1v1h-1z" fill="currentColor"/></svg>
+        Acceso desde celular
+      </button>
+      <div class="status-led" id="statusLed">
+        <span class="led-dot"></span>
+        <span class="led-label" id="statusLabel">ESTABLE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ MODAL: ACCESO DESDE CELULAR (código QR) ============ -->
+  <div class="qr-modal" id="qrModal" style="display:none;">
+    <div class="qr-modal-card">
+      <button class="qr-modal-close" id="qrModalClose" aria-label="Cerrar">✕</button>
+      <h3>Acceso desde celular</h3>
+      <p class="qr-modal-hint">Escanea este código con la cámara del teléfono para abrir CENTRIX directamente en el navegador — no requiere instalar ninguna app.</p>
+      <div class="qr-modal-code" id="qrModalCode"></div>
+      <div class="qr-modal-url" id="qrModalUrl">—</div>
+      <a class="qr-modal-marker-link" href="marker.html" target="_blank" rel="noopener">
+        ¿Vas a usar Realidad Aumentada? Descarga o imprime el marcador aquí →
+      </a>
+    </div>
+  </div>
+
+  <!-- ============ CUERPO PRINCIPAL: 3 COLUMNAS ============ -->
+  <main class="workspace">
+
+    <!-- ---------- COLUMNA IZQUIERDA: PARÁMETROS ---------- -->
+    <aside class="panel panel-params">
+      <div class="panel-head">
+        <span class="panel-eyebrow">§1</span>
+        <h2>Panel de Parámetros</h2>
+      </div>
+
+      <div class="panel-scroll" id="paramsScroll">
+        <!-- Se puebla dinámicamente por equipo -->
+      </div>
+
+      <div class="panel-foot" id="ecuacionActiva">
+        <span class="foot-label">Ecuación gobernante</span>
+        <div class="foot-eq" id="foot-eq-render">—</div>
+      </div>
+    </aside>
+
+    <!-- ---------- COLUMNA CENTRAL: VISOR 3D ---------- -->
+    <section class="panel panel-viewer">
+      <div class="viewer-toolbar">
+        <div class="viewer-title">
+          <span class="panel-eyebrow">§2</span>
+          <h2 id="viewerTitle">Decantador Líquido-Líquido</h2>
+        </div>
+        <div class="viewer-controls">
+          <button class="vbtn" id="btnReset" title="Restablecer cámara">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M4 10a6 6 0 1 1 2 4.47M4 10V5M4 10h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Reencuadrar
+          </button>
+          <button class="vbtn" id="btnSpin" title="Alternar rotación del eje">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 3a7 7 0 1 1-4.95 2.05" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M10 3v4l3-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Girar eje
+          </button>
+          <div class="view-mode-group" id="viewModeGroup">
+            <button class="view-mode-btn" data-mode="industrial" title="Carcasa cerrada, aspecto de equipo real de planta">
+              <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 9h14" stroke="currentColor" stroke-width="1.5"/></svg>
+              Industrial
+            </button>
+            <button class="view-mode-btn active" data-mode="interior" title="Carcasa traslúcida, ve el proceso por dentro">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M10 3.5C5.5 3.5 2.5 10 2.5 10s3 6.5 7.5 6.5 7.5-6.5 7.5-6.5-3-6.5-7.5-6.5Z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg>
+              Interior
+            </button>
+          </div>
+          <button class="vbtn vbtn-ar" id="btnAR" title="Ver el equipo activo en Realidad Aumentada">
+            <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="4" width="15" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 8h15M7 4v3M13 4v3" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="12.2" r="2.1" stroke="currentColor" stroke-width="1.5"/></svg>
+            Ver en Realidad Aumentada
+          </button>
+          <a class="vbtn vbtn-marker" href="marker.html" target="_blank" rel="noopener" title="Ver, descargar o imprimir el marcador necesario para el modo AR">
+            <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 7h4v4H3zM10 12h4M10 9h1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Marcador AR
+          </a>
+          <span class="ar-unsupported-note" id="arUnsupported" style="display:none;" title="Este navegador o dispositivo no soporta Realidad Aumentada">
+            AR no disponible en este dispositivo
+          </span>
+        </div>
+      </div>
+      <div class="viewer-canvas-wrap">
+        <canvas id="viewer3d"></canvas>
+        <div class="viewer-hint">Arrastrar para orbitar · Rueda para zoom · Clic derecho para desplazar · Vista interior revela la superficie líquida cilíndrica</div>
+        <div class="viewer-hud" id="viewerHud"></div>
+      </div>
+    </section>
+
+    <!-- ---------- COLUMNA DERECHA: DATOS Y GRÁFICAS ---------- -->
+    <aside class="panel panel-data">
+      <div class="panel-head">
+        <span class="panel-eyebrow">§3</span>
+        <h2>Lectura de Proceso</h2>
+      </div>
+
+      <div class="panel-scroll" id="dataScroll">
+        <!-- Cronómetro de simulación -->
+        <div class="sim-clock" id="simClock">
+          <div class="sim-clock-top">
+            <div class="sim-clock-time-wrap">
+              <span class="sim-clock-eyebrow">Tiempo de proceso</span>
+              <span class="sim-clock-time" id="simTime">0.0 s</span>
+            </div>
+            <div class="sim-clock-transport">
+              <button class="sim-btn" id="simPlay" title="Reproducir">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 4.5v11l9-5.5-9-5.5Z"/></svg>
+              </button>
+              <button class="sim-btn active" id="simPause" title="Pausar">
+                <svg viewBox="0 0 20 20" fill="currentColor"><rect x="5.5" y="4.5" width="3" height="11" rx="0.5"/><rect x="11.5" y="4.5" width="3" height="11" rx="0.5"/></svg>
+              </button>
+              <button class="sim-btn" id="simReset" title="Reiniciar">
+                <svg viewBox="0 0 20 20" fill="none"><path d="M4 10a6 6 0 1 1 2 4.47M4 10V5M4 10h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="sim-clock-bottom">
+            <div class="sim-progress-wrap">
+              <div class="sim-progress-track"><div class="sim-progress-fill" id="simProgressFill"></div></div>
+              <span class="sim-progress-label" id="simProgressLabel">—</span>
+            </div>
+            <div class="sim-speed-group" id="simSpeedGroup">
+              <button class="speed-btn" data-speed="1">1×</button>
+              <button class="speed-btn active" data-speed="2">2×</button>
+              <button class="speed-btn" data-speed="5">5×</button>
+              <button class="speed-btn" data-speed="20">20×</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerta de estabilidad -->
+        <div class="alert-box" id="alertBox">
+          <svg viewBox="0 0 20 20" fill="none" class="alert-icon"><path d="M10 2 18 17H2L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v4M10 14.5v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <div class="alert-text">
+            <strong id="alertTitle">Operación estable</strong>
+            <span id="alertBody">La diferencia de densidades es suficiente para una separación efectiva.</span>
+          </div>
+        </div>
+
+        <!-- Grid de resultados numéricos -->
+        <div class="readout-grid" id="readoutGrid"></div>
+
+        <!-- Gráficas -->
+        <div class="chart-block">
+          <div class="chart-label">
+            <span id="chart1Title">Posición Radial de Partícula</span>
+            <span class="chart-eq" id="chart1Eq">r(t)</span>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart1"></canvas></div>
+        </div>
+
+        <div class="chart-block">
+          <div class="chart-label">
+            <span id="chart2Title">Presión en Pared vs. Tiempo</span>
+            <span class="chart-eq" id="chart2Eq">P₂(t)</span>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart2"></canvas></div>
+        </div>
+
+        <div class="chart-block" id="chart3Block">
+          <div class="chart-label">
+            <span id="chart3Title">Concentración Acumulada en Pared</span>
+            <span class="chart-eq" id="chart3Eq">C(t)</span>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart3"></canvas></div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ============ MODO AR (AR.js / marcador Hiro) — video + canvas dedicados
+       + overlay HTML. Oculto por defecto. ar.js activa la cámara y el
+       tracking del marcador al iniciar, y lo devuelve a este estado al
+       salir. Ver ar.js para la lógica. -->
+  <!-- Contenedor del <video> de la cámara que crea THREEx.ArToolkitSource —
+       queda DETRÁS del canvas transparente (ver z-index en style.css). -->
+  <div id="arVideoWrap" style="display:none;"></div>
+  <canvas id="arCanvas" style="display:none;"></canvas>
+  <div class="ar-overlay" id="arOverlay" style="display:none;">
+    <div class="ar-topbar">
+      <span class="ar-equip-label" id="arEquipLabel">—</span>
+      <div class="ar-equip-switch" id="arEquipSwitch">
+        <button class="ar-chip" data-ar-equip="decanter" title="Ver Decantador Líquido-Líquido en AR">Decantador</button>
+        <button class="ar-chip" data-ar-equip="bowl" title="Ver Purificador de Tazón en AR">Purificador</button>
+        <button class="ar-chip" data-ar-equip="pump" title="Ver Bomba Centrífuga en AR">Bomba</button>
+      </div>
+      <button class="ar-chip active" id="arToggleLabels" title="Mostrar/ocultar etiquetas flotantes">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M3 10h14M3 6h10M3 14h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Etiquetas
+      </button>
+      <button class="ar-chip" id="arToggleTheory" title="Explorar componentes: tocar una pieza muestra su teoría">
+        <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v4.2M10 6.6v.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Explorar componentes
+      </button>
+      <button class="ar-chip ar-chip-exit" id="arExit" title="Salir de Realidad Aumentada">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Salir
+      </button>
+    </div>
+
+    <div class="ar-hint" id="arHint">Apunta la cámara hacia el marcador Hiro impreso · descárgalo en marker.html</div>
+
+    <div class="ar-bottombar">
+      <button class="ar-chip" id="arResetPlacement" title="Restablecer rotación y escala del equipo">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M4 10a6 6 0 1 1 2 4.47M4 10V5M4 10h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Reiniciar posición
+      </button>
+      <span class="ar-gesture-hint">1 dedo: rotar · 2 dedos: escalar</span>
+    </div>
+
+    <!-- Billboard de lecturas en vivo — posicionado dinámicamente por ar.js
+         proyectando un punto 3D sobre el equipo colocado -->
+    <div class="ar-readout-panel" id="arReadoutPanel" style="display:none;"></div>
+
+    <!-- Ficha de teoría (modo didáctico) -->
+    <div class="ar-theory-card" id="arTheoryCard" style="display:none;"></div>
+
+    <div class="ar-toast" id="arToast" style="display:none;"></div>
+  </div>
+
+  <!-- ============ FOOTER: BARRA DE FÓRMULAS DE REFERENCIA ============ -->
+  <footer class="formula-strip">
+    <div class="fs-item"><span class="fs-tag">Presión anular</span><span class="fs-eq">P₂−P₁ = (ρω²/2)(r₂²−r₁²)</span></div>
+    <div class="fs-item"><span class="fs-tag">Zona neutra</span><span class="fs-eq">r_i² = (ρ_A r_A² + ρ_B r_B²) / (ρ_A + ρ_B)</span></div>
+    <div class="fs-item"><span class="fs-tag">Velocidad terminal</span><span class="fs-eq">u_t = D_p²(ρ_p−ρ)ω²r / 18μ</span></div>
+    <div class="fs-item"><span class="fs-tag">Leyes de afinidad</span><span class="fs-eq">q∝n · ΔH∝n² · P∝n³</span></div>
+  </footer>
+
+</div>
+
+<script src="engine.js"></script>
+<script src="scene3d.js"></script>
+<script src="charts.js"></script>
+<script src="ui.js"></script>
+<script src="qr.js"></script>
+<script src="ar.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

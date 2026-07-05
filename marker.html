@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marcador AR · CENTRIX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- jsPDF (vendorizado localmente) — usado por el botón "Descargar PDF"
+     para generar un PDF de una página con el marcador a tamaño de
+     impresión correcto (sin depender de ningún servicio externo). -->
+<script src="libs/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg:            #10141A;
+    --bg-panel:      #171C24;
+    --bg-inset:      #0D1116;
+    --border:        #2A313C;
+    --border-soft:   rgba(74,86,104,.35);
+    --text-primary:  #F4F1EA;
+    --text-secondary:#8A93A3;
+    --text-dim:      #545E6C;
+    --heavy:  #E8A33D;
+    --light:  #4FC3D9;
+    --green:  #3DCB7A;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--bg);color:var(--text-primary);
+    font-family:var(--font-display);
+    display:flex;flex-direction:column;align-items:center;
+    padding:36px 20px 60px;min-height:100vh;
+  }
+  .mk-back{
+    align-self:flex-start;
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--text-secondary);text-decoration:none;font-size:12.5px;
+    font-family:var(--font-mono);margin-bottom:22px;
+  }
+  .mk-back:hover{color:var(--text-primary);}
+  .mk-header{text-align:center;max-width:520px;margin-bottom:28px;}
+  .mk-eyebrow{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;
+    color:var(--light);text-transform:uppercase;
+  }
+  .mk-header h1{margin:6px 0 10px;font-size:24px;}
+  .mk-header p{margin:0;color:var(--text-secondary);font-size:13.5px;line-height:1.6;}
+
+  .mk-card{
+    background:var(--bg-panel);border:1px solid var(--border);border-radius:18px;
+    padding:32px;display:flex;flex-direction:column;align-items:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+  }
+  #markerImg{
+    width:min(320px, 70vw);height:min(320px, 70vw);
+    background:#fff;border-radius:10px;
+    display:block;
+  }
+  .mk-caption{
+    margin-top:14px;font-family:var(--font-mono);font-size:11px;
+    color:var(--text-dim);text-align:center;
+  }
+
+  .mk-actions{
+    display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+    margin-top:26px;max-width:520px;
+  }
+  .mk-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:12px;font-weight:600;
+    padding:11px 18px;border-radius:9px;border:1px solid var(--border);
+    background:var(--bg-inset);color:var(--text-primary);
+    cursor:pointer;text-decoration:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .mk-btn:hover{border-color:var(--light);background:rgba(79,195,217,.08);}
+  .mk-btn.primary{border-color:var(--green);color:var(--green);}
+  .mk-btn.primary:hover{background:rgba(61,203,122,.1);}
+  .mk-btn svg{width:15px;height:15px;flex:none;}
+
+  .mk-tips{
+    max-width:560px;margin-top:34px;
+    border-top:1px solid var(--border);padding-top:22px;
+  }
+  .mk-tips h2{font-size:13px;color:var(--text-secondary);text-transform:uppercase;
+    letter-spacing:.08em;font-family:var(--font-mono);margin:0 0 12px;}
+  .mk-tips ul{margin:0;padding-left:18px;color:var(--text-secondary);font-size:13px;line-height:1.8;}
+  .mk-tips b{color:var(--text-primary);}
+
+  /* ============ Impresión: solo el marcador, a tamaño real ============ */
+  @media print{
+    body{background:#fff;padding:0;min-height:0;}
+    .mk-back, .mk-header, .mk-actions, .mk-tips, .mk-caption{display:none !important;}
+    .mk-card{
+      box-shadow:none;border:none;background:#fff;padding:0;
+      width:100%;height:100vh;
+      display:flex;align-items:center;justify-content:center;
+    }
+    #markerImg{
+      /* 9 cm de lado imprime de forma confiable en hoja carta/A4 sin
+         recortarse por los márgenes por defecto del navegador. */
+      width:9cm;height:9cm;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <a class="mk-back" href="index.html">← Volver al simulador</a>
+
+  <div class="mk-header">
+    <span class="mk-eyebrow">CENTRIX · Realidad Aumentada</span>
+    <h1>Marcador AR — "Hiro"</h1>
+    <p>
+      Imprime este marcador y colócalo sobre una mesa. Al presionar
+      "Ver en Realidad Aumentada" en el simulador y apuntar la cámara del
+      celular hacia él, aparecerá el equipo de Ingeniería Química
+      seleccionado en 3D sobre la imagen real.
+    </p>
+  </div>
+
+  <div class="mk-card">
+    <img id="markerImg" src="assets/ar/hiro.png" alt="Marcador de Realidad Aumentada Hiro">
+    <div class="mk-caption">assets/ar/hiro.png · marcador estándar de AR.js</div>
+  </div>
+
+  <div class="mk-actions">
+    <a class="mk-btn primary" id="btnDownloadPng" href="assets/ar/hiro.png" download="centrix-marcador-hiro.png">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v10m0 0 3.5-3.5M10 13l-3.5-3.5M4 16h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Descargar PNG
+    </a>
+    <button class="mk-btn" id="btnDownloadPdf">
+      <svg viewBox="0 0 20 20" fill="none"><rect x="4" y="2.5" width="12" height="15" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M7 8h6M7 11h6M7 14h3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Descargar PDF
+    </button>
+    <button class="mk-btn" id="btnPrint">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M5.5 7V3h9v4M5.5 14h-2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2M5.5 12h9v5h-9v-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      Imprimir
+    </button>
+  </div>
+
+  <div class="mk-tips">
+    <h2>Recomendaciones para una detección confiable</h2>
+    <ul>
+      <li>Imprime a <b>tamaño real</b> (desactiva "ajustar a página" / "escalar" en el diálogo de impresión).</li>
+      <li>Usa una superficie <b>plana y bien iluminada</b>, evita reflejos sobre el papel.</li>
+      <li>Mantén el celular a una distancia de <b>20–50 cm</b> del marcador durante el escaneo.</li>
+      <li>El marcador debe verse <b>completo y sin dobleces</b> dentro del encuadre de la cámara.</li>
+    </ul>
+  </div>
+
+<script>
+  document.getElementById("btnPrint").addEventListener("click", () => window.print());
+
+  document.getElementById("btnDownloadPdf").addEventListener("click", async () => {
+    const btn = document.getElementById("btnDownloadPdf");
+    const originalLabel = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = "Generando PDF…";
+    try {
+      const { jsPDF } = window.jspdf;
+      const img = document.getElementById("markerImg");
+
+      // Se dibuja el PNG en un <canvas> para poder incrustarlo como
+      // dataURL en el PDF (jsPDF no acepta rutas de archivo directamente).
+      const canvas = document.createElement("canvas");
+      const size = 1000;
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      const bmp = await createImageBitmap(await (await fetch(img.src)).blob());
+      ctx.drawImage(bmp, 0, 0, size, size);
+      const dataUrl = canvas.toDataURL("image/png");
+
+      const doc = new jsPDF({ unit: "cm", format: "letter" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const markerSize = 9; // cm — mismo tamaño usado en @media print
+      const x = (pageW - markerSize) / 2;
+      const y = (pageH - markerSize) / 2 - 1;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("CENTRIX — Marcador de Realidad Aumentada", pageW / 2, y - 1, { align: "center" });
+      doc.addImage(dataUrl, "PNG", x, y, markerSize, markerSize);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text("Imprime a tamaño real (100%) · coloca sobre una superficie plana bien iluminada", pageW / 2, y + markerSize + 1, { align: "center" });
+
+      doc.save("centrix-marcador-hiro.pdf");
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo generar el PDF. Puedes usar el botón Imprimir → Guardar como PDF como alternativa.");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+    }
+  });
+</script>
+
+</body>
+</html>
